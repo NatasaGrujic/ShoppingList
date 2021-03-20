@@ -1,0 +1,99 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+    
+    <h1 class="display-4"><i class="bi bi-cart-check"></i> Shopping List</h1>
+    @if (Model.IsSignedIn)
+    {
+        @*<p>You are logged in as @Model.currentUser.UserName</p>*@
+        @*<p>User ID: @Model.currentUser.Id </p>*@
+
+
+        @if (Model.NewInput == null)
+        {
+            <div>
+                @*Toggle = on / off
+                    Frm = Form*@
+                @*<button class="btn btn-default" onclick="newFrmToggle" value="Add article"</button>*@
+                @*    <button class="btn btn-primary" data-toggle="collapse" data-target="#newfrm" aria-expanded="@(Model.KeepOpen ? "true" : "false")" aria-controls="newfrm">
+                        Add
+                    </button>*@
+                <td>
+                    <h3>Add articles to list:</h3>
+                    <a asp-route-handler="" aria-label="Add article" data-toggle="collapse" data-target="#newfrm" aria-expanded="@(Model.KeepOpen ? "true" : "false")" aria-controls="newfrm"> <i class="bi bi-plus-square"></i></a>
+                </td>
+            </div>
+            @*<div class="collapse" id="newfrm">*@
+            <div class="collapse @(Model.KeepOpen ? "show" : null)" id="newfrm">
+                <form method="post">
+                    <input name="itemdescription" placeholder="Article description" />
+                    <input name="quantity" type="number" placeholder="Quantity" />
+                    @*Both above will be saved in our "formpost" when clicking the button*@
+                    @*<input type="submit" value="Save" />*@
+                    <button type="submit" class="btn btn-link"><i class="bi bi-save-fill" aria-label="Save"></i></button>
+                </form>
+            </div>
+        }
+        @if (Model.groceryItems.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th>Quantity</th>
+                        <th>Purchased</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.groceryItems)
+                    {
+                        <tr>
+                            @if (Model.NewInput == null || item.ID != Model.NewInput.Id)
+                            {
+                                <td>@item.ItemDescription</td>
+                                <td>@item.Quantity</td>
+                                <td><a asp-page-handler="UpdateItemState" asp-route-id="@item.ID" aria-label="@(item.Purchased ? "Return article" : "Collect article")"><span><i class="bi @(item.Purchased ? "bi-check-square" : "bi-square")"></i></span></a></td>
+
+                                @*Check if the user is logged in and has placed the articles in the shopping list*@
+                                @if (Model.currentUser.Id == item.ByUserID)
+                                {
+
+                                    <td>
+                                        <a asp-route-changeid="@item.ID" aria-label="Edit"><i class="bi bi-pencil"></i></a>
+                                        <a asp-page-handler="RemoveItem" asp-route-id="@item.ID" aria-label="Remove article"><i class="bi bi-trash"></i></a>
+                                    </td>
+                                }
+                            }
+                            else
+                            {
+                                <form method="post">
+                                    <input type="hidden" name="id" value="@item.ID" />
+                                    <td><input name="itemdescription" placeholder="Article description" value="@Model.NewInput.ItemDescription" /></td>
+                                    <td><input name="quantity" type="number" placeholder="Quantity" value="@Model.NewInput.Quantity" /></td>
+                                    <td>
+                                        @*<td><input type="submit" value="Save" /></td>*@
+                                        <button type="submit" class="btn btn-link"><i class="bi bi-save-fill" aria-label="Save"></i></button>
+                                    </td>
+                                    @*<td><a button asp-page-handler="View" method="post" aria-label="Save"> <i class="bi bi-save"></i></a></td>*@
+                                </form>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>The list is empty.</p>
+        }
+    }
+    else
+    {
+        <p>You are NOT logged in.</p>
+    }
+</div>
